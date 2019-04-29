@@ -13,9 +13,9 @@ class IntSet {
     //因此需要记录每个通的负数个数
     //查找的时候根据数据大小选择桶进行查找
     //输出的时候则需要先输出每个桶的负数再输出0和正数
-    int i16NegCount = 0;
-    int i32NegCount = 0;
-    int i64NegCount = 0;
+    unsigned int i16NegCount = 0;
+    unsigned int i32NegCount = 0;
+    unsigned int i64NegCount = 0;
 
    public:
     void del(const int64_t&);
@@ -28,10 +28,11 @@ class IntSet {
     // INT32_MAX
 };
 bool IntSet::contains(const int64_t& data) {
+    unsigned int i;
     if (data <= INT16_MAX && data >= INT16_MIN) {
         // find in i16set;
         //采用顺序查找，可以改进为二分查找
-        for (int i = 0; i < i16set.size(); ++i) {
+        for (i = 0; i < i16set.size(); ++i) {
             if (i16set[i] == data) {
                 return true;
             } else if (i16set[i] > data) {
@@ -40,7 +41,7 @@ bool IntSet::contains(const int64_t& data) {
         }
     } else if (data <= INT32_MAX && data >= INT32_MIN) {
         // find in i32set;
-        for (int i = 0; i < i32set.size(); ++i) {
+        for (i = 0; i < i32set.size(); ++i) {
             if (i32set[i] == data) {
                 return true;
             } else if (i32set[i] > data) {
@@ -49,7 +50,7 @@ bool IntSet::contains(const int64_t& data) {
         }
     } else {
         // find in i64set;
-        for (int i = 0; i < i64set.size(); ++i) {
+        for (i = 0; i < i64set.size(); ++i) {
             if (i64set[i] == data) {
                 return true;
             } else if (i64set[i] > data) {
@@ -104,7 +105,7 @@ void IntSet::insert(const int64_t& data) {
     }
 }
 void IntSet::print() {
-    int i = 0;
+    unsigned int i = 0;
     for (i = 0; i < i64NegCount; ++i) {
         std::cout << i64set[i] << " ";
     }
@@ -126,7 +127,7 @@ void IntSet::print() {
     std::cout << std::endl;
 }
 void IntSet::del(const int64_t& data) {
-    int i = 0;
+    unsigned int i = 0;
     if (data <= INT16_MAX && data >= INT16_MIN) {
         // find in i16set;
         //采用顺序查找，可以改进为二分查找

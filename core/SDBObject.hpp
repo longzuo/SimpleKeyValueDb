@@ -1,6 +1,7 @@
 #ifndef SDB_SDBOBJECT_HPP
 #define SDB_SDBOBJECT_HPP
 #include "Dict.hpp"
+#include "Exception.hpp"
 #include "IntSet.hpp"
 #include "List.hpp"
 #include "SkipList.hpp"
@@ -52,40 +53,47 @@ class SDBObject {
     static std::shared_ptr<SDBObject> CreateHashObject();
     static std::shared_ptr<SDBObject> CreateOSetObject();
 
-    //for object
+    // for object
     std::string getObjType();
     std::string getEncType();
 
     // for String
-    void set(const int64_t&);
     void set(std::string&&);
     void append(const std::string&);
     ssize_t getStrLen();
+
+    // for list
+    void push(std::string&&);
+    void pop(std::ostream& out);
+    ssize_t llen();
 
     // SDBObject& operator=(const SDBObject&);
 
     void print(std::ostream& out = std::cout);
 };
 
-SDBObject::SDBObject() { this->objtype = SdbObjType::SDB_NULL; }
+SDBObject::SDBObject() {
+    this->objtype = SdbObjType::SDB_NULL;
+    this->enctype = SdbEncType::SDB_ENC_INT;
+}
 SDBObject::~SDBObject() {
-    switch (this->objtype) {
-        case SdbObjType::SDB_STRING:
-            if (this->enctype != SdbEncType::SDB_ENC_INT) {
-                delete value.str;
-            }
-            break;
-        case SdbObjType::SDB_HASH:
-            delete value.dict;
-            break;
-        case SdbObjType::SDB_LIST:
-            delete value.list;
-            break;
-        case SdbObjType::SDB_OSET:
-            delete value.sklist;
-            break;
-        default:
-            break;
+    if (this->enctype != SdbEncType::SDB_ENC_INT) {
+        switch (this->objtype) {
+            case SdbObjType::SDB_STRING:
+                if (value.str) delete value.str;
+                break;
+            case SdbObjType::SDB_HASH:
+                if (value.dict) delete value.dict;
+                break;
+            case SdbObjType::SDB_LIST:
+                if (value.list) delete value.list;
+                break;
+            case SdbObjType::SDB_OSET:
+                if (value.sklist) delete value.sklist;
+                break;
+            default:
+                break;
+        }
     }
 }
 std::shared_ptr<SDBObject> SDBObject::CreateStrObject() {
@@ -96,7 +104,7 @@ std::shared_ptr<SDBObject> SDBObject::CreateListObject() {
     std::shared_ptr<SDBObject> temp = std::make_shared<SDBObject>();
     temp->enctype = SdbEncType::SDB_ENC_LINKEDLIST;
     temp->objtype = SdbObjType::SDB_LIST;
-    temp->value.list=new List<SDBObject>;
+    temp->value.list = new List<SDBObject>;
     return temp;
 }
 
@@ -114,96 +122,106 @@ std::shared_ptr<SDBObject> SDBObject::CreateOSetObject() {
     return temp;
 }
 
-std::string SDBObject::getObjType(){
+std::string SDBObject::getObjType() {
     std::string res;
-    switch(this->objtype){
+    switch (this->objtype) {
         case SdbObjType::SDB_STRING:
-            res="string";
+            res = "string";
             break;
         case SdbObjType::SDB_HASH:
-            res="hash";
+            res = "hash";
             break;
         case SdbObjType::SDB_SET:
-            res="set";
+            res = "set";
             break;
         case SdbObjType::SDB_NULL:
-            res="null";
+            res = "null";
             break;
         case SdbObjType::SDB_OSET:
-            res="ordered set";
+            res = "ordered set";
             break;
         case SdbObjType::SDB_LIST:
-            res="list";
+            res = "list";
             break;
     }
     return res;
 }
 
-std::string SDBObject::getEncType(){
+std::string SDBObject::getEncType() {
     std::string res;
-    switch(this->enctype){
+    switch (this->enctype) {
         case SdbEncType::SDB_ENC_INT:
-            res="int";
+            res = "int";
             break;
         case SdbEncType::SDB_ENC_RAW:
-            res="raw";
+            res = "raw";
             break;
         case SdbEncType::SDB_ENC_INTSET:
-            res="intset";
+            res = "intset";
             break;
         case SdbEncType::SDB_ENC_LINKEDLIST:
-            res="linkedlist";
+            res = "linkedlist";
             break;
         case SdbEncType::SDB_ENC_SKIPLIST:
-            res="skiplist";
+            res = "skiplist";
             break;
         case SdbEncType::SDB_ENC_HT:
-            res="hashtable";
+            res = "hashtable";
             break;
     }
     return res;
-}
-
-void SDBObject::set(const int64_t& data) {
-    if (this->objtype == SdbObjType::SDB_NULL) {
-        this->objtype = SdbObjType::SDB_STRING;
-        this->enctype = SdbEncType::SDB_ENC_INT;
-    }
-    if (this->objtype == SdbObjType::SDB_STRING) {
-        if (this->enctype == SdbEncType::SDB_ENC_RAW) {
-            delete this->value.str;
-        }
-        this->value.istr = data;
-        this->enctype = SdbEncType::SDB_ENC_INT;
-    } else {
-        // error
-    }
 }
 
 void SDBObject::set(std::string&& s) {
-    if (this->objtype == SdbObjType::SDB_NULL) {
-        this->objtype = SdbObjType::SDB_STRING;
-        this->enctype = SdbEncType::SDB_ENC_RAW;
-        this->value.str = nullptr;
+    if (this->objtype != SdbObjType::SDB_STRING &&
+        this->objtype != SdbObjType::SDB_NULL) {
+        throw SdbException("command is not supported for this type!");
     }
-    if (this->objtype == SdbObjType::SDB_STRING) {
-        if (this->enctype != SdbEncType::SDB_ENC_INT) {
-            if (this->value.str) delete this->value.str;
+
+    this->objtype = SdbObjType::SDB_STRING;
+
+    bool isNumber = true;
+    bool isNeg = false;
+    int64_t res = 0;
+    if (s.size() <= 18) {
+        unsigned int i = 0;
+        if (s[0] == '-') {
+            i++;
+            isNeg = true;
         }
-        this->value.str = new std::string(s);
-        this->enctype = SdbEncType::SDB_ENC_RAW;
+        for (; i < s.size(); ++i) {
+            if (s[i] >= '0' && s[i] <= '9') {
+                res = res * 10 + s[i] - '0';
+            } else {
+                isNumber = false;
+                break;
+            }
+        }
+        if (isNumber && isNeg) {
+            res = 0 - res;
+        }
+    }
+    if (this->enctype == SdbEncType::SDB_ENC_RAW) {
+        if (this->value.str) {
+            delete this->value.str;
+        }
+    }
+    if (isNumber) {
+        this->value.istr = res;
+        this->enctype = SdbEncType::SDB_ENC_INT;
     } else {
-        // error
+        this->value.str = new std::string(std::move(s));
+        this->enctype = SdbEncType::SDB_ENC_RAW;
     }
 }
 
 void SDBObject::append(const std::string& data) {
     if (this->objtype == SdbObjType::SDB_STRING ||
         this->objtype == SdbObjType::SDB_NULL) {
-        if(this->objtype==SdbObjType::SDB_NULL){
-            this->objtype= SdbObjType::SDB_STRING;
+        if (this->objtype == SdbObjType::SDB_NULL) {
+            this->objtype = SdbObjType::SDB_STRING;
             this->value.str = new std::string;
-        }else if (this->enctype == SdbEncType::SDB_ENC_INT) {
+        } else if (this->enctype == SdbEncType::SDB_ENC_INT) {
             long temp = this->value.istr;
             this->value.str = new std::string;
             this->value.str->append(std::to_string(temp));
@@ -214,40 +232,71 @@ void SDBObject::append(const std::string& data) {
         this->value.str->append(data);
     } else {
         // error
+        throw SdbException("command is not supported for this type!");
     }
 }
 
-ssize_t SDBObject::getStrLen(){
-    if(this->objtype==SdbObjType::SDB_STRING){
-        if(this->enctype==SdbEncType::SDB_ENC_RAW){
+ssize_t SDBObject::getStrLen() {
+    if (this->objtype == SdbObjType::SDB_STRING) {
+        if (this->enctype == SdbEncType::SDB_ENC_RAW) {
             return this->value.str->size();
-        }else{
-            int64_t temp=this->value.istr;
-            int64_t length=0;
-            if(temp<0){
-                temp=0-temp;
+        } else {
+            int64_t temp = this->value.istr;
+            int64_t length = 0;
+            if (temp < 0) {
+                temp = 0 - temp;
                 ++length;
             }
-            while(temp){
+            while (temp) {
                 ++length;
-                temp/=10;
+                temp /= 10;
             }
             return length;
         }
-    }else{
-        //error
+    } else {
+        // error
+        throw SdbException("command is not supported for this type!");
     }
 }
-
+void SDBObject::push(std::string&& s) {
+    this->value.list->push(SDBObject());
+    auto& temp = this->value.list->last()->data;
+    temp.set(std::move(s));
+}
+void SDBObject::pop(std::ostream& out) {
+    if (this->objtype != SdbObjType::SDB_LIST) {
+        throw SdbException("command is not supported for this type!");
+    }
+    if (this->value.list == nullptr) {
+        out << "null" << '\n';
+    }
+    auto temp = this->value.list->pop();
+    temp->data.print(out);
+}
+ssize_t SDBObject::llen() {
+    if (this->objtype != SdbObjType::SDB_LIST) {
+        throw SdbException("command is not supported for this type!");
+    }
+    if (this->value.list == nullptr) {
+        return 0;
+    }
+    return this->value.list->len();
+}
 void SDBObject::print(std::ostream& out) {
     if (this->objtype == SdbObjType::SDB_STRING) {
         if (this->enctype == SdbEncType::SDB_ENC_INT) {
-            out << this->value.istr << std::endl;
+            out << std::to_string(this->value.istr) << '\n';
         } else {
-            out << *(this->value.str) << std::endl;
+            out << *(this->value.str) << '\n';
         }
-    }else{
-        out<<"unknown type"<<std::endl;
+    } else if (this->objtype == SdbObjType::SDB_LIST) {
+        auto temp = this->value.list->first();
+        while (temp.get()) {
+            temp->data.print(out);
+            temp = temp->next;
+        }
+    } else {
+        throw SdbException("unknown type!");
     }
 }
 

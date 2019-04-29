@@ -1,15 +1,16 @@
 #ifndef SDB_EXECUTOR_HPP
 #define SDB_EXECUTOR_HPP
 #include <sstream>
+#include "./DoDb.hpp"
+#include "./DoList.hpp"
+#include "./DoObject.hpp"
 #include "./DoString.hpp"
-#include"./DoObject.hpp"
-#include"./DoDb.hpp"
 namespace SDB {
 
 class Executor {
    private:
     std::vector<Db> dblist;
-    int currentdb = 0;
+    unsigned int currentdb = 0;
 
    public:
     Executor() { dblist.resize(2); }
@@ -26,11 +27,14 @@ void Executor::execute(const std::string& command, std::ostream& out) {
         return;
     }
     if (words[0] == "object") {
-        doObject(words,out,dblist[currentdb]);
-    } else if (words[0] == "select"||words[0]=="del") {
-        doDb(words, out,dblist,currentdb);
+        doObject(words, out, dblist[currentdb]);
+    } else if (words[0] == "select" || words[0] == "del") {
+        doDb(words, out, dblist, currentdb);
+    } else if (words[0] == "lpush" || words[0] == "lgetall" ||
+               words[0] == "lpop" || words[0] == "llen") {
+        doList(words, out, dblist[currentdb]);
     } else {
-        doString(words, out,dblist[currentdb]);
+        doString(words, out, dblist[currentdb]);
     }
 }
 

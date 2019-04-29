@@ -5,13 +5,13 @@
 namespace SDB {
 // declare
 void doDb(const std::vector<std::string>&, std::ostream&, std::vector<Db>&,
-          int&);
+          unsigned int&);
 void doSelect(const std::vector<std::string>&, std::ostream&, std::vector<Db>&,
-              int&);
+              unsigned int&);
 void doDel(const std::vector<std::string>&, std::ostream&, Db&);
 // define
 void doDb(const std::vector<std::string>& commands, std::ostream& out,
-          std::vector<Db>& dblist, int& currentdb) {
+          std::vector<Db>& dblist, unsigned int& currentdb) {
     if (commands.size() < 2) {
         throw SdbException("error:missing arguments!");
     }
@@ -24,9 +24,9 @@ void doDb(const std::vector<std::string>& commands, std::ostream& out,
     }
 }
 void doSelect(const std::vector<std::string>& commands, std::ostream&,
-              std::vector<Db>& dblist, int& currentdb) {
-    int selectdb = 0;
-    for (int i = 0; i < commands[1].size(); ++i) {
+              std::vector<Db>& dblist, unsigned int& currentdb) {
+    unsigned int selectdb = 0;
+    for (unsigned int i = 0; i < commands[1].size(); ++i) {
         if (commands[1][i] >= '0' && commands[1][i] <= '9') {
             selectdb = selectdb * 10 + commands[1][i] - '0';
         } else {

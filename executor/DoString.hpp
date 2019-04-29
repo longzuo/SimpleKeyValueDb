@@ -34,32 +34,7 @@ void doSet(std::vector<std::string>& commands, std::ostream& out, Db& db) {
         if (!newptr.get()) {
             newptr = SDBObject::CreateStrObject();
         }
-        bool isNumber = true;
-        bool isNeg = false;
-        int64_t res = 0;
-        if (commands[2].size() <= 18) {
-            int i = 0;
-            if (commands[2][0] == '-') {
-                i++;
-                isNeg = true;
-            }
-            for (; i < commands[2].size(); ++i) {
-                if (commands[2][i] >= '0' && commands[2][i] <= '9') {
-                    res = res * 10 + commands[2][i] - '0';
-                } else {
-                    isNumber = false;
-                    break;
-                }
-            }
-            if (isNumber && isNeg) {
-                res = 0 - res;
-            }
-        }
-        if (isNumber) {
-            newptr->set(res);
-        } else {
-            newptr->set(std::move(commands[2]));
-        }
+        newptr->set(std::move(commands[2]));
     }
 }
 

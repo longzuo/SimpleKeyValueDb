@@ -29,8 +29,8 @@ class List {
     void push(const T&);
     NodePointer pop();
     ssize_t len() const { return length; }
-    NodePointer first(){return head;}
-    NodePointer last(){return last;}
+    NodePointer& first(){return head;}
+    NodePointer& last(){return tail;}
 };
 
 template <typename T>
@@ -50,7 +50,8 @@ template <typename T>
 typename List<T>::NodePointer List<T>::pop() {
     if(length==0)return nullptr;
     NodePointer res = head;
-    head = head->next;
+    NodePointer nex=head->next;
+    head = nex;
     length--;
     if (length == 0) {
         tail = head;
