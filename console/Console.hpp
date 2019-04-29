@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include"../executor/Executor.hpp"
+#include"../core/Exception.hpp"
 namespace SDB {
 class Console {
    private:
@@ -21,7 +22,12 @@ void Console::run(){
             std::cout<<"bye"<<std::endl;
             break;
         }
-        executor.execute(input,std::cout);
+        try{
+            executor.execute(input,std::cout);
+            std::cout<<std::flush;
+        }catch(const SdbException& e){
+            std::cout<<e.what()<<std::endl;
+        }
     }
 }
 }  // namespace SDB

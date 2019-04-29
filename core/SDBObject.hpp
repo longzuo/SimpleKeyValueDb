@@ -96,6 +96,7 @@ std::shared_ptr<SDBObject> SDBObject::CreateListObject() {
     std::shared_ptr<SDBObject> temp = std::make_shared<SDBObject>();
     temp->enctype = SdbEncType::SDB_ENC_LINKEDLIST;
     temp->objtype = SdbObjType::SDB_LIST;
+    temp->value.list=new List<SDBObject>;
     return temp;
 }
 
