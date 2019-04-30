@@ -14,7 +14,6 @@ double StringUtil::toDouble(const std::string& str) {
     double res = 0;
     int integer = 0;
     bool isNeg = false;
-    bool isNumber = false;
     unsigned int i = 0;
     if (str[0] == '-') {
         if (str.size() == 1) {
@@ -31,12 +30,9 @@ double StringUtil::toDouble(const std::string& str) {
         }
     }
     res = integer;
-    if (i == str.size()) {
-        return res;
-    }
     integer=0;
     unsigned int start=0;
-    if (str[i] == '.') {
+    if (i<str.size()&&str[i] == '.') {
         ++i;
         start=i;
         for (; i < str.size(); ++i) {
@@ -55,6 +51,9 @@ double StringUtil::toDouble(const std::string& str) {
             count--;
         }
         res+=temp;
+    }
+    if(isNeg){
+        res=0-res;
     }
     return res;
 }

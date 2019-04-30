@@ -11,6 +11,8 @@ class OrderedSet {
     OrderedSet(const int& _max_level = 32) : slist(_max_level) {}
     typename SkipList<T>::NodePointer insert(const double& score,
                                              const T& value);
+    typename SkipList<T>::NodePointer insert(const double& score,
+                                            T&& value);
     void del(const double&);
     void print(std::ostream&);
 };
@@ -19,6 +21,11 @@ template <typename T>
 typename SkipList<T>::NodePointer OrderedSet<T>::insert(const double& score,
                                                         const T& value) {
     return slist.insert(score, value);
+}
+template <typename T>
+typename SkipList<T>::NodePointer OrderedSet<T>::insert(const double& score,
+                                                        T&& value) {
+    return slist.insert(score, std::move(value));
 }
 
 template <typename T>

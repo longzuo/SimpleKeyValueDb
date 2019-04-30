@@ -27,6 +27,7 @@ class List {
 
    public:
     void push(const T&);
+    void push(T&&);
     NodePointer pop();
     ssize_t len() const { return length; }
     NodePointer& first(){return head;}
@@ -47,12 +48,24 @@ void List<T>::push(const T& _data) {
     length++;
 }
 
+template<typename T>
+void List<T>::push(T&& _data){
+    if (head.get() == nullptr) {
+        head = std::make_shared<Node>();
+        tail = head;
+    } else {
+        tail->next = std::make_shared<Node>();
+        tail = tail->next;
+    }
+    tail->data = std::move(_data);
+    length++;
+}
+
 template <typename T>
 typename List<T>::NodePointer List<T>::pop() {
     if(length==0)return nullptr;
     NodePointer res = head;
-    NodePointer nex=head->next;
-    head = nex;
+    head=head->next;
     length--;
     if (length == 0) {
         tail = head;
@@ -67,7 +80,7 @@ template<typename T>
 void List<T>::print(std::ostream& out){
     auto temp = this->head;
     while (temp.get()) {
-        temp->data.print(out);
+        out<<temp->data<<'\n';
         temp = temp->next;
     }
 }

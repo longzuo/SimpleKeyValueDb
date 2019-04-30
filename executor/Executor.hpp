@@ -6,6 +6,7 @@
 #include "./DoList.hpp"
 #include "./DoObject.hpp"
 #include "./DoOset.hpp"
+#include "./DoSet.hpp"
 #include "./DoString.hpp"
 namespace SDB {
 
@@ -40,7 +41,10 @@ void Executor::execute(const std::string& command, std::ostream& out) {
         doHash(words, out, dblist[currentdb]);
     } else if (words[0] == "oadd" || words[0] == "odel" ||
                words[0] == "ogetall") {
-        doOset(words,out,dblist[currentdb]);
+        doOset(words, out, dblist[currentdb]);
+    } else if (words[0] == "sadd" || words[0] == "sdel" ||
+               words[0] == "sgetall") {
+        doSet(words, out, dblist[currentdb]);
     } else {
         doString(words, out, dblist[currentdb]);
     }

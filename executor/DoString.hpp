@@ -5,8 +5,8 @@
 namespace SDB {
 // declare
 void doString(std::vector<std::string>&, std::ostream&, Db&);
-void doSet(std::vector<std::string>&, std::ostream&, Db&);
-void doGet(std::vector<std::string>&, std::ostream&, Db&);
+void doSset(std::vector<std::string>&, std::ostream&, Db&);
+void doSget(std::vector<std::string>&, std::ostream&, Db&);
 void doStrlen(std::vector<std::string>&, std::ostream&, Db&);
 void doAppend(std::vector<std::string>&, std::ostream&, Db&);
 
@@ -14,9 +14,9 @@ void doAppend(std::vector<std::string>&, std::ostream&, Db&);
 
 void doString(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (commands[0] == "set") {
-        doSet(commands, out, db);
+        doSset(commands, out, db);
     } else if (commands[0] == "get") {
-        doGet(commands, out, db);
+        doSget(commands, out, db);
     } else if (commands[0] == "append") {
         doAppend(commands, out, db);
     } else if (commands[0] == "strlen") {
@@ -26,7 +26,7 @@ void doString(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     }
 }
 
-void doSet(std::vector<std::string>& commands, std::ostream& out, Db& db) {
+void doSset(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (commands.size() < 3) {
         throw SdbException("error:missing arguments!");
     } else {
@@ -38,7 +38,7 @@ void doSet(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     }
 }
 
-void doGet(std::vector<std::string>& commands, std::ostream& out, Db& db) {
+void doSget(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (commands.size() < 2) {
         throw SdbException("error:missing arguments!");
     } else {

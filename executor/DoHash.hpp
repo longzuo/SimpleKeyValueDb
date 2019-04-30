@@ -28,7 +28,7 @@ void doHadd(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (!ptr.get()) {
         ptr = SDBObject::CreateHashObject();
     }
-    ptr->hadd(commands[2], std::move(commands[3]));
+    ptr->hadd(std::move(commands[2]), std::move(commands[3]));
 }
 
 void doHdel(std::vector<std::string>& commands, std::ostream& out, Db& db) {
