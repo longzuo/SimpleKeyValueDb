@@ -4,11 +4,11 @@
 #include <string>
 #include "../core/Exception.hpp"
 #include "../executor/Executor.hpp"
+
 namespace SDB {
 class Console {
    private:
     std::string input;
-    bool isRunning;
 
    public:
     void run();
@@ -16,11 +16,10 @@ class Console {
 void Console::run() {
     Executor executor;
     while (true) {
-        std::cout << "sdb>";
+        std::cout << "sdb>>";
         std::getline(std::cin, input);
         if (input == "exit") {
-            std::cout << std::endl;
-            std::cout << "bye" << std::endl;
+            std::cout << "bye bye!" << std::endl;
             break;
         }
         try {
@@ -29,6 +28,7 @@ void Console::run() {
         } catch (const SdbException& e) {
             std::cout << e.what() << std::endl;
         }
+        
     }
 }
 }  // namespace SDB

@@ -194,7 +194,7 @@ std::shared_ptr<SkipListNode<T>> SkipList<T>::insert(const double& score,
 
 template <typename T>
 std::shared_ptr<SkipListNode<T>> SkipList<T>::insert(const double& score,
-                                                    T&& value) {
+                                                     T&& value) {
     NodePointer node = head;
     std::vector<NodePointer> update;
     update.resize(maxLevel);
@@ -332,7 +332,7 @@ template <typename T>
 void SkipList<T>::print(std::ostream& out) {
     NodePointer node = head->level[0].forward;
     while (node.get()) {
-        out << node->score << " "<<node->data<<'\n';
+        out << node->score << " " << node->data << '\n';
         node = node->level[0].forward;
     }
 }

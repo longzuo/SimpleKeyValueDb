@@ -8,7 +8,8 @@ template <typename Key, typename Hash = std::hash<Key>,
 class Set {
    private:
     std::unordered_set<Key, Hash, Equal> uset;
-    using iterator=typename std::unordered_set<Key, Hash, Equal>::iterator;
+    using iterator = typename std::unordered_set<Key, Hash, Equal>::iterator;
+
    public:
     void add(const Key&);
     void add(Key&&);
@@ -33,7 +34,7 @@ void Set<Key, Hash, Equal>::del(const Key& value) {
 template <typename Key, typename Hash, typename Equal>
 void Set<Key, Hash, Equal>::print(std::ostream& out) {
     for (auto it = uset.begin(); it != uset.end(); ++it) {
-        out<<*it<<'\n';
+        out << *it << '\n';
     }
 }
 

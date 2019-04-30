@@ -10,8 +10,8 @@ class ListNode {
     T data;
     std::shared_ptr<ListNode> pre;
     std::shared_ptr<ListNode> next;
-    bool hasNext(){return (next.get()!=nullptr);}
-    bool hasPrevious(){return (pre.get()!=nullptr);}
+    bool hasNext() { return (next.get() != nullptr); }
+    bool hasPrevious() { return (pre.get() != nullptr); }
 };
 
 template <typename T>
@@ -30,9 +30,9 @@ class List {
     void push(T&&);
     NodePointer pop();
     ssize_t len() const { return length; }
-    NodePointer& first(){return head;}
-    NodePointer& last(){return tail;}
-    void print(std::ostream& );
+    NodePointer& first() { return head; }
+    NodePointer& last() { return tail; }
+    void print(std::ostream&);
 };
 
 template <typename T>
@@ -48,8 +48,8 @@ void List<T>::push(const T& _data) {
     length++;
 }
 
-template<typename T>
-void List<T>::push(T&& _data){
+template <typename T>
+void List<T>::push(T&& _data) {
     if (head.get() == nullptr) {
         head = std::make_shared<Node>();
         tail = head;
@@ -63,24 +63,23 @@ void List<T>::push(T&& _data){
 
 template <typename T>
 typename List<T>::NodePointer List<T>::pop() {
-    if(length==0)return nullptr;
+    if (length == 0) return nullptr;
     NodePointer res = head;
-    head=head->next;
+    head = head->next;
     length--;
     if (length == 0) {
         tail = head;
-    }else
-    {
+    } else {
         res->next.reset();
         head->pre.reset();
     }
     return res;
 }
-template<typename T>
-void List<T>::print(std::ostream& out){
+template <typename T>
+void List<T>::print(std::ostream& out) {
     auto temp = this->head;
     while (temp.get()) {
-        out<<temp->data<<'\n';
+        out << temp->data << '\n';
         temp = temp->next;
     }
 }

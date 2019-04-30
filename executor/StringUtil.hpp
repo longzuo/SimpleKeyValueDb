@@ -30,30 +30,30 @@ double StringUtil::toDouble(const std::string& str) {
         }
     }
     res = integer;
-    integer=0;
-    unsigned int start=0;
-    if (i<str.size()&&str[i] == '.') {
+    integer = 0;
+    unsigned int start = 0;
+    if (i < str.size() && str[i] == '.') {
         ++i;
-        start=i;
+        start = i;
         for (; i < str.size(); ++i) {
             if (str[i] >= '0' && str[i] <= '9') {
                 integer = integer * 10 + str[i] - '0';
             } else {
                 throw SdbException("can not convert to double from:" + str);
             }
-        }        
+        }
     }
-    if(integer!=0){
-        unsigned int count=str.size()-start;
-        double temp=integer;
-        while(count){
-            temp/=10;
+    if (integer != 0) {
+        unsigned int count = str.size() - start;
+        double temp = integer;
+        while (count) {
+            temp /= 10;
             count--;
         }
-        res+=temp;
+        res += temp;
     }
-    if(isNeg){
-        res=0-res;
+    if (isNeg) {
+        res = 0 - res;
     }
     return res;
 }

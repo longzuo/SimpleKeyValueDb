@@ -63,8 +63,8 @@ void doLlen(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     } else {
         SDBObject::ObjPointer res = db.find(commands[1]);
         if (res.get()) {
-            out << std::to_string(res->llen())<<'\n';
-            //out<<res->llen()<<'\n';
+            out << std::to_string(res->llen()) << '\n';
+            // out<<res->llen()<<'\n';
         } else {
             out << "0" << '\n';
         }

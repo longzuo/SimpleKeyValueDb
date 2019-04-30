@@ -390,9 +390,7 @@ ssize_t SDBObject::getStrLen() {
         throw SdbException("command is not supported for this type!");
     }
 }
-void SDBObject::push(std::string&& s) {
-    this->value.list->push(std::move(s));
-}
+void SDBObject::push(std::string&& s) { this->value.list->push(std::move(s)); }
 void SDBObject::pop(std::ostream& out) {
     if (this->objtype != SdbObjType::SDB_LIST) {
         throw SdbException("command is not supported for this type!");
@@ -401,7 +399,7 @@ void SDBObject::pop(std::ostream& out) {
         out << "null" << '\n';
     }
     auto temp = this->value.list->pop();
-    out<<temp->data<<'\n';
+    out << temp->data << '\n';
 }
 ssize_t SDBObject::llen() {
     if (this->objtype != SdbObjType::SDB_LIST) {
@@ -417,7 +415,7 @@ void SDBObject::hadd(std::string&& key, std::string&& value) {
         throw SdbException("command is not supported for this type!");
     }
     auto& temp = this->value.dict->operator[](std::move(key));
-    temp=std::move(value);
+    temp = std::move(value);
 }
 void SDBObject::hdel(const std::string& key) { this->value.dict->del(key); }
 
@@ -425,7 +423,7 @@ void SDBObject::oadd(const double& score, std::string&& value) {
     if (this->objtype != SdbObjType::SDB_OSET) {
         throw SdbException("command is not supported for this type!");
     }
-    this->value.oset->insert(score,std::move(value));
+    this->value.oset->insert(score, std::move(value));
 }
 void SDBObject::odel(const double& score) {
     if (this->objtype != SdbObjType::SDB_OSET) {
