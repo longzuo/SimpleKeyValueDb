@@ -4,8 +4,7 @@
 #include "Exception.hpp"
 #include "IntSet.hpp"
 #include "List.hpp"
-#include "SkipList.hpp"
-
+#include "OrderedSet.hpp"
 namespace SDB {
 enum class SdbObjType {
     //字符串
@@ -38,8 +37,8 @@ class SDBObject {
         long istr;
         std::string* str;
         List<SDBObject>* list;
-        SkipList<SDBObject>* sklist;
         Dict<SDBObject>* dict;
+        OrderedSet<SDBObject>* oset;
         IntSet* iset;
     } value;
 
@@ -67,6 +66,14 @@ class SDBObject {
     void pop(std::ostream& out);
     ssize_t llen();
 
+    // for hash
+    void hadd(const std::string&, std::string&&);
+    void hdel(const std::string&);
+
+    // for ordered set
+    void oadd(const double& socre, std::string&&);
+    void odel(const double&);
+
     // SDBObject& operator=(const SDBObject&);
 
     void print(std::ostream& out = std::cout);
@@ -89,7 +96,7 @@ SDBObject::~SDBObject() {
                 if (value.list) delete value.list;
                 break;
             case SdbObjType::SDB_OSET:
-                if (value.sklist) delete value.sklist;
+                if (value.oset) delete value.oset;
                 break;
             default:
                 break;
@@ -112,6 +119,7 @@ std::shared_ptr<SDBObject> SDBObject::CreateHashObject() {
     std::shared_ptr<SDBObject> temp = std::make_shared<SDBObject>();
     temp->enctype = SdbEncType::SDB_ENC_HT;
     temp->objtype = SdbObjType::SDB_HASH;
+    temp->value.dict = new Dict<SDBObject>;
     return temp;
 }
 
@@ -119,6 +127,7 @@ std::shared_ptr<SDBObject> SDBObject::CreateOSetObject() {
     std::shared_ptr<SDBObject> temp = std::make_shared<SDBObject>();
     temp->enctype = SdbEncType::SDB_ENC_SKIPLIST;
     temp->objtype = SdbObjType::SDB_OSET;
+    temp->value.oset = new OrderedSet<SDBObject>;
     return temp;
 }
 
@@ -282,6 +291,29 @@ ssize_t SDBObject::llen() {
     }
     return this->value.list->len();
 }
+void SDBObject::hadd(const std::string& key, std::string&& value) {
+    if (this->objtype != SdbObjType::SDB_HASH) {
+        throw SdbException("command is not supported for this type!");
+    }
+    auto& temp = this->value.dict->operator[](key);
+    temp.set(std::move(value));
+}
+void SDBObject::hdel(const std::string& key) { this->value.dict->del(key); }
+
+void SDBObject::oadd(const double& score, std::string&& value) {
+    if (this->objtype != SdbObjType::SDB_OSET) {
+        throw SdbException("command is not supported for this type!");
+    }
+    auto ptr = this->value.oset->insert(score, SDBObject());
+    ptr->data.set(std::move(value));
+}
+void SDBObject::odel(const double& score) {
+    if (this->objtype != SdbObjType::SDB_OSET) {
+        throw SdbException("command is not supported for this type!");
+    }
+    this->value.oset->del(score);
+}
+
 void SDBObject::print(std::ostream& out) {
     if (this->objtype == SdbObjType::SDB_STRING) {
         if (this->enctype == SdbEncType::SDB_ENC_INT) {
@@ -290,11 +322,11 @@ void SDBObject::print(std::ostream& out) {
             out << *(this->value.str) << '\n';
         }
     } else if (this->objtype == SdbObjType::SDB_LIST) {
-        auto temp = this->value.list->first();
-        while (temp.get()) {
-            temp->data.print(out);
-            temp = temp->next;
-        }
+        this->value.list->print(out);
+    } else if (this->objtype == SdbObjType::SDB_HASH) {
+        this->value.dict->print(out);
+    } else if (this->objtype == SdbObjType::SDB_OSET) {
+        this->value.oset->print(out);
     } else {
         throw SdbException("unknown type!");
     }

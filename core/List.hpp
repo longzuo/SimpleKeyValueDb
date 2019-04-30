@@ -31,6 +31,7 @@ class List {
     ssize_t len() const { return length; }
     NodePointer& first(){return head;}
     NodePointer& last(){return tail;}
+    void print(std::ostream& );
 };
 
 template <typename T>
@@ -61,6 +62,14 @@ typename List<T>::NodePointer List<T>::pop() {
         head->pre.reset();
     }
     return res;
+}
+template<typename T>
+void List<T>::print(std::ostream& out){
+    auto temp = this->head;
+    while (temp.get()) {
+        temp->data.print(out);
+        temp = temp->next;
+    }
 }
 
 }  // namespace SDB

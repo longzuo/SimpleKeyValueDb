@@ -1,10 +1,10 @@
 #ifndef SDB_SKIPLIST_HPP
 #define SDB_SKIPLIST_HPP
 #include <chrono>
+#include <iostream>
 #include <memory>
 #include <random>
 #include <vector>
-#include<iostream>
 namespace SDB {
 
 template <typename T>
@@ -29,9 +29,11 @@ class SkipListNode {
 
 template <typename T>
 class SkipList {
-   private:
+   public:
     using Node = SkipListNode<T>;
     using NodePointer = std::shared_ptr<SkipListNode<T>>;
+
+   private:
     NodePointer head;
     NodePointer tail;
     // std::shared_ptr<SkipListNode<T>> head;
@@ -45,13 +47,12 @@ class SkipList {
     int randomLevel();
 
    public:
-    SkipList(const int&);
+    SkipList(const int& _max_level = 32);
     std::shared_ptr<T> search(const double&);
     NodePointer insert(const double&, const T&);
-    void del(const T&, const double&);
     void del(const double&);
     unsigned long getRank();
-    void print();
+    void print(std::ostream&);
 };
 
 template <typename T>
@@ -59,7 +60,7 @@ SkipList<T>::SkipList(const int& _max_level) {
     maxLevel = _max_level;
     head = std::make_shared<SkipListNode<T>>();
     head->level.resize(maxLevel);
-    level=1;
+    level = 1;
 }
 
 template <typename T>
@@ -118,12 +119,12 @@ std::shared_ptr<SkipListNode<T>> SkipList<T>::insert(const double& score,
         }
         */
         while ((node->level[i].forward.get()) &&
-               (node->level[i].forward->score <=score)) {
+               (node->level[i].forward->score <= score)) {
             // forward的score小于新socre或者forward的data小于新value，向前
             //此时rank[i]中已经存放了上一个节点的rank
             // node->level[i].span代表的是上一个节点到下一个节点的跨度
-            if(node->level[i].forward->score==score){
-                node->level[i].forward->data=value;
+            if (node->level[i].forward->score == score) {
+                node->level[i].forward->data = value;
                 return node->level[i].forward;
             }
             rank[i] += node->level[i].span;
@@ -138,7 +139,7 @@ std::shared_ptr<SkipListNode<T>> SkipList<T>::insert(const double& score,
         return node->level[i].forward;
     }
     */
-   //if()
+    // if()
     //随机产生level
     int rlevel = randomLevel();
     if (rlevel > this->level) {
@@ -190,27 +191,27 @@ std::shared_ptr<SkipListNode<T>> SkipList<T>::insert(const double& score,
     return newnode;
 }
 template <typename T>
-void SkipList<T>::del(const double& score){
+void SkipList<T>::del(const double& score) {
     NodePointer node = head;
     std::vector<NodePointer> update;
     update.resize(this->level);
     for (int i = this->level - 1; i >= 0; i--) {
         while ((node->level[i].forward.get()) &&
-               (node->level[i].forward->score <score)) {
+               (node->level[i].forward->score < score)) {
             node = node->level[i].forward;
         }
         update[i] = node;
     }
-    
-    if(!node->level[0].forward.get()||node->level[0].forward->score>score){
+
+    if (!node->level[0].forward.get() ||
+        node->level[0].forward->score > score) {
         return;
     }
-    NodePointer rmnode=node->level[0].forward;
-    for (int i = 0; i < rmnode->level.size(); i++) {
-       
+    NodePointer rmnode = node->level[0].forward;
+    for (unsigned int i = 0; i < rmnode->level.size(); i++) {
         update[i]->level[i].forward = rmnode->level[i].forward;
-        
-        update[i]->level[i].span+=rmnode->level[i].span-1;
+
+        update[i]->level[i].span += rmnode->level[i].span - 1;
     }
     //如果rlevel小于list中最大的level，则所有的update[i]
     //后继都不变，不过span需要+1
@@ -221,23 +222,21 @@ void SkipList<T>::del(const double& score){
     //如果是除头结点外第一个节点，那么前驱为nullptr
     //否则更新为update[0]
     if (update[0].get()) {
-        if(rmnode->level[0].forward.get()){
+        if (rmnode->level[0].forward.get()) {
             rmnode->level[0].forward->backward = update[0];
-        }
-        else{
-            tail=update[0];
+        } else {
+            tail = update[0];
         }
     }
     length--;
 }
 template <typename T>
-void SkipList<T>::print(){
-    NodePointer node=head->level[0].forward;
-    while(node.get()){
-        std::cout<<"level:"<<node->level.size()<<" score:";
-        std::cout<<node->score<<" data:";
-        std::cout<<node->data<<std::endl;
-        node=node->level[0].forward;
+void SkipList<T>::print(std::ostream& out) {
+    NodePointer node = head->level[0].forward;
+    while (node.get()) {
+        out << node->score << " ";
+        node->data.print(out);
+        node = node->level[0].forward;
     }
 }
 }  // namespace SDB

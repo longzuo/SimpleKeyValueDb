@@ -2,8 +2,10 @@
 #define SDB_EXECUTOR_HPP
 #include <sstream>
 #include "./DoDb.hpp"
+#include "./DoHash.hpp"
 #include "./DoList.hpp"
 #include "./DoObject.hpp"
+#include "./DoOset.hpp"
 #include "./DoString.hpp"
 namespace SDB {
 
@@ -33,6 +35,12 @@ void Executor::execute(const std::string& command, std::ostream& out) {
     } else if (words[0] == "lpush" || words[0] == "lgetall" ||
                words[0] == "lpop" || words[0] == "llen") {
         doList(words, out, dblist[currentdb]);
+    } else if (words[0] == "hadd" || words[0] == "hdel" ||
+               words[0] == "hgetall") {
+        doHash(words, out, dblist[currentdb]);
+    } else if (words[0] == "oadd" || words[0] == "odel" ||
+               words[0] == "ogetall") {
+        doOset(words,out,dblist[currentdb]);
     } else {
         doString(words, out, dblist[currentdb]);
     }

@@ -66,7 +66,7 @@ void doAppend(std::vector<std::string>& commands, std::ostream& out, Db& db) {
 void doStrlen(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     SDBObject::ObjPointer res = db.find(commands[1]);
     if (res.get()) {
-        out << res->getStrLen() << '\n';
+        out << std::to_string(res->getStrLen()) << '\n';
     } else {
         out << "0" << '\n';
     }

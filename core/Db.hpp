@@ -11,7 +11,7 @@ class Db {
     void add(const std::string& key, const SDBObject::ObjPointer& objptr);
     void del(const std::string& key);
     SDBObject::ObjPointer find(const std::string&);
-    SDBObject::ObjPointer& operator[](const std::string& );
+    SDBObject::ObjPointer& operator[](const std::string&);
 };
 
 void Db::add(const std::string& key, const SDBObject::ObjPointer& objptr) {
@@ -29,7 +29,7 @@ SDBObject::ObjPointer Db::find(const std::string& key) {
     }
 }
 
-SDBObject::ObjPointer& Db::operator[](const std::string& key){
+SDBObject::ObjPointer& Db::operator[](const std::string& key) {
     return db[key];
 }
 }  // namespace SDB

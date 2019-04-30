@@ -16,6 +16,9 @@ public:
     void replace(const std::string& key,const Value& value);
     Value get(const std::string& key){return umap[key];}
     void del(const std::string&);
+    auto& operator[](const std::string& key);
+    void print(std::ostream&);
+
 };
 
 template<typename Value>
@@ -32,7 +35,17 @@ template<typename Value>
 void Dict<Value>::del(const std::string& key){
     umap.erase(key);
 }
-
+template<typename Value>
+auto& Dict<Value>::operator[](const std::string& key){
+    return umap[key];
+}
+template<typename Value>
+void Dict<Value>::print(std::ostream& out){
+    for(auto it=umap.begin();it!=umap.end();++it){
+        out<<it->first<<" ";
+        it->second.print(out);
+    }
+}
 
 }
 
