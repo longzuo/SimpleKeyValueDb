@@ -31,7 +31,8 @@ void Executor::execute(const std::string& command, std::ostream& out) {
     }
     if (words[0] == "object") {
         doObject(words, out, dblist[currentdb]);
-    } else if (words[0] == "select" || words[0] == "del") {
+    } else if (words[0] == "select" || words[0] == "del" ||
+               words[0] == "expire" || words[0] == "pexpire") {
         doDb(words, out, dblist, currentdb);
     } else if (words[0] == "lpush" || words[0] == "lgetall" ||
                words[0] == "lpop" || words[0] == "llen") {

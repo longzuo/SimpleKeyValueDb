@@ -23,7 +23,7 @@ void doSadd(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (commands.size() < 3) {
         throw SdbException("missing arguments!");
     }
-    auto& ptr = db[commands[1]];
+    auto& ptr = db[std::move(commands[1])];
     if (!ptr.get()) {
         ptr = SDBObject::CreateSetObject();
     }

@@ -55,7 +55,12 @@ void doAppend(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (commands.size() < 3) {
         throw SdbException("error:missing arguments!");
     } else {
-        SDBObject::ObjPointer& res = db[commands[1]];
+        SDBObject::ObjPointer fres = db.find(commands[1]);
+        if (fres.get()) {
+            fres->append(commands[2]);
+            return;
+        }
+        SDBObject::ObjPointer& res = db[std::move(commands[1])];
         if (!res.get()) {
             res = SDBObject::CreateStrObject();
         }

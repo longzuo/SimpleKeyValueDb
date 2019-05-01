@@ -8,7 +8,6 @@ template <typename Key, typename Hash = std::hash<Key>,
 class Set {
    private:
     std::unordered_set<Key, Hash, Equal> uset;
-    using iterator = typename std::unordered_set<Key, Hash, Equal>::iterator;
 
    public:
     void add(const Key&);
@@ -30,7 +29,7 @@ void Set<Key, Hash, Equal>::del(const Key& value) {
     uset.erase(value);
 }
 
-// print 不具有通用性
+// 将值输出到指定输出流中
 template <typename Key, typename Hash, typename Equal>
 void Set<Key, Hash, Equal>::print(std::ostream& out) {
     for (auto it = uset.begin(); it != uset.end(); ++it) {

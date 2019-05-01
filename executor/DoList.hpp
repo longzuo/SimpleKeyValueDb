@@ -27,7 +27,7 @@ void doPush(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (commands.size() < 3) {
         throw SdbException("error:missing arguments!");
     }
-    SDBObject::ObjPointer& newptr = db[commands[1]];
+    SDBObject::ObjPointer& newptr = db[std::move(commands[1])];
     if (!newptr.get()) {
         newptr = SDBObject::CreateListObject();
     }
