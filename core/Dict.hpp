@@ -6,11 +6,12 @@ namespace SDB {
 // unordered_map 不是渐进式rehash，如果有必要可以自定义哈希表数据结构
 template <typename Value>
 class Dict {
+    friend class Db;
    private:
     std::unordered_map<std::string, Value> umap;
 
    public:
-    ssize_t size() { return umap.size(); }
+    size_t size() { return umap.size(); }
     void clear() { umap.clear(); }
 
     void add(const std::string& key, const Value& value);

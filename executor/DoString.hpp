@@ -30,6 +30,11 @@ void doSset(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (commands.size() < 3) {
         throw SdbException("error:missing arguments!");
     } else {
+        SDBObject::ObjPointer fres = db.find(commands[1]);
+        if (fres.get()) {
+            fres->set(std::move(commands[2]));
+            return;
+        }
         SDBObject::ObjPointer& newptr = db[commands[1]];
         if (!newptr.get()) {
             newptr = SDBObject::CreateStrObject();

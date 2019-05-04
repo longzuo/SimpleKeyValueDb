@@ -4,6 +4,7 @@
 namespace SDB {
 template <typename T>
 class OrderedSet {
+    friend class Db;
    private:
     SkipList<T> slist;
 

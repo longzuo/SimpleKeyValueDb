@@ -6,6 +6,8 @@ namespace SDB {
 template <typename Key, typename Hash = std::hash<Key>,
           typename Equal = std::equal_to<Key>>
 class Set {
+    friend class Db;
+
    private:
     std::unordered_set<Key, Hash, Equal> uset;
 

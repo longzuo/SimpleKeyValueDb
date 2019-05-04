@@ -5,7 +5,6 @@
 #include <random>
 #include <string>
 #include "./console/Console.hpp"
-#include<chrono>
 using namespace SDB;
 int main() {
     Console console;

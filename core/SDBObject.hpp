@@ -35,6 +35,7 @@ class SDBObjectCmp;
 class SDBObject {
     friend class SDBObjectHash;
     friend class SDBObjectCmp;
+    friend class Db;
 
    private:
     SdbObjType objtype;
@@ -66,6 +67,7 @@ class SDBObject {
     // for object
     std::string getObjType();
     std::string getEncType();
+    SdbObjType getEnumObjType(){return this->objtype;}
 
     // for String
     void set(std::string&&);
@@ -270,7 +272,7 @@ std::string SDBObject::getObjType() {
             res = "null";
             break;
         case SdbObjType::SDB_OSET:
-            res = "ordered set";
+            res = "orderedset";
             break;
         case SdbObjType::SDB_LIST:
             res = "list";

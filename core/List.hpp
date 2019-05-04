@@ -23,13 +23,13 @@ class List {
    private:
     NodePointer head;
     NodePointer tail;
-    ssize_t length = 0;
+    size_t length = 0;
 
    public:
     void push(const T&);
     void push(T&&);
     NodePointer pop();
-    ssize_t len() const { return length; }
+    size_t len() const { return length; }
     NodePointer& first() { return head; }
     NodePointer& last() { return tail; }
     void print(std::ostream&);

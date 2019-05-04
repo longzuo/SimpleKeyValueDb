@@ -25,6 +25,7 @@ class SkipListNode {
     double score;
     //数据
     T data;
+    auto& next(){return level[0].forward;}
 };
 
 template <typename T>
@@ -51,9 +52,11 @@ class SkipList {
     std::shared_ptr<T> search(const double&);
     NodePointer insert(const double&, const T&);
     NodePointer insert(const double&, T&&);
+    NodePointer& first(){return head->level[0].forward;}
     void del(const double&);
     unsigned long getRank();
     void print(std::ostream&);
+    size_t len(){return length;}
 };
 
 template <typename T>
