@@ -11,11 +11,14 @@
 #include "SDBObject.hpp"
 namespace SDB {
 
-enum class IntegerEncoding { INTENC8 = 12, INTENC16, INTENC32, INTENC64 };
 const unsigned char EXPIRE = 16;
 class Db {
    private:
+    //采用智能指针存储，方便在查询结果中返回nullptr，同时减少copy时的拷贝量
+    //另外，SDBObject没有引用计数的时候，使用智能指针管理，加上了引用计数后为了方便
+    //没有改。。。。
     std::map<std::string, SDBObject::ObjPointer> db;
+    //存储时间戳
     std::unordered_map<std::string, std::time_t> expire;
 
     int checkOutOfDate(const std::string&);
@@ -123,23 +126,15 @@ void Db::saveObjectType(std::ofstream& ofs, const SDBObject::ObjPointer& obj) {
 |SDB|db_version|key-value|EOF|
 
 key-value
-    |expire|time_t|type|key|value|
-    |type|key|value|
+    有过期时间:|expire|time_t|type|key|value|
+    无过期时间:|type|key|value|
 key
     raw string
 value
-    string,int
-
+    string
 string
-    |size|str value|
-
-string object
-    |enc|value|
-    enc:raw,int
-    value:
-        raw:string
-        int:long
-
+    raw:|enc|size|str value|
+    int:|enc|value|
 */
 void Db::saveStringObject(std::ofstream& ofs,
                           const SDBObject::ObjPointer& obj) {
@@ -283,26 +278,101 @@ void Db::loadListObject(std::ifstream& ifs, bool tobesave, std::string& key) {
     //
     long length = 0;
     loadInteger(ifs, length);
-    auto& ptr = this->db[std::move(key)];
+    auto& ptr = this->db[key];
     if (tobesave) {
         if (!ptr.get()) {
             ptr = SDBObject::CreateListObject();
         }
     }
     while (length > 0 && ifs.peek() != EOF) {
-        long strsize=0;
+        long strsize = 0;
         std::string str;
-        loadInteger(ifs,strsize);
-        loadString(ifs,str,strsize);
-        if(tobesave){
+        loadInteger(ifs, strsize);
+        loadString(ifs, str, strsize);
+        if (tobesave) {
             ptr->push(std::move(str));
         }
-        length--;
+        --length;
+    }
+    if (!tobesave) {
+        db.erase(key);
     }
 }
-void Db::loadHashObject(std::ifstream& ifs, bool, std::string&) {}
-void Db::loadOsetObject(std::ifstream&, bool, std::string&) {}
-void Db::loadSetObject(std::ifstream&, bool, std::string&) {}
+void Db::loadHashObject(std::ifstream& ifs, bool tobesave, std::string& key) {
+    long length = 0;
+    loadInteger(ifs, length);
+    auto& ptr = this->db[key];
+    if (tobesave) {
+        if (!ptr.get()) {
+            ptr = SDBObject::CreateHashObject();
+        }
+    }
+    while (length > 0 && ifs.peek() != EOF) {
+        std::string hkey, hvalue;
+        long strsize = 0;
+        loadInteger(ifs, strsize);
+        loadString(ifs, hkey, strsize);
+        strsize = 0;
+        loadInteger(ifs, strsize);
+        loadString(ifs, hvalue, strsize);
+        if (tobesave) {
+            ptr->hadd(std::move(hkey), std::move(hvalue));
+        }
+        --length;
+    }
+    if (!tobesave) {
+        this->db.erase(key);
+    }
+}
+void Db::loadOsetObject(std::ifstream& ifs, bool tobesave, std::string& key) {
+    long length = 0;
+    loadInteger(ifs, length);
+    auto& ptr = this->db[key];
+    if (tobesave) {
+        if (!ptr.get()) {
+            ptr = SDBObject::CreateOSetObject();
+        }
+    }
+    while (length > 0 && ifs.peek() != EOF) {
+        long strsize = 0;
+        std::string score, value;
+        loadInteger(ifs, strsize);
+        loadString(ifs, score, strsize);
+        strsize = 0;
+        loadInteger(ifs, strsize);
+        loadString(ifs, value, strsize);
+        if (tobesave) {
+            ptr->oadd(StringUtil::toDouble(score), std::move(value));
+        }
+        --length;
+    }
+    if (!tobesave) {
+        db.erase(key);
+    }
+}
+void Db::loadSetObject(std::ifstream& ifs, bool tobesave, std::string& key) {
+    long length = 0;
+    loadInteger(ifs, length);
+    auto& ptr = this->db[key];
+    if (tobesave) {
+        if (!ptr.get()) {
+            ptr = SDBObject::CreateSetObject();
+        }
+    }
+    while (length > 0 && ifs.peek() != EOF) {
+        long strsize = 0;
+        std::string str;
+        loadInteger(ifs, strsize);
+        loadString(ifs, str, strsize);
+        if (tobesave) {
+            ptr->sadd(std::move(str));
+        }
+        --length;
+    }
+    if (!tobesave) {
+        db.erase(key);
+    }
+}
 void Db::load(const std::string& filename) {
     std::ifstream ifs(filename, std::ifstream::in | std::ifstream::binary);
     if (!ifs.good()) {
@@ -310,10 +380,11 @@ void Db::load(const std::string& filename) {
     }
     std::string sdb;
     loadString(ifs, sdb, 3);
-    std::cout << "dbname:" << sdb << std::endl;
+    if (sdb.compare("SDB") != 0) {
+        throw SdbException("file format is not correct!");
+    }
     int dbversion = 0;
     loadInteger(ifs, dbversion);
-    std::cout << "db version:" << dbversion << std::endl;
     while (ifs.peek() != EOF) {
         char typeOrExpire = 0;
         bool hasExpire = false;
@@ -321,7 +392,6 @@ void Db::load(const std::string& filename) {
         loadInteger(ifs, typeOrExpire);
         long etime = 0;
         if (typeOrExpire == EXPIRE) {
-            std::cout << "expire detected" << std::endl;
             loadInteger(ifs, etime);
             if (std::chrono::system_clock::now() <
                 std::chrono::system_clock::from_time_t(etime)) {
@@ -331,13 +401,10 @@ void Db::load(const std::string& filename) {
             }
             loadInteger(ifs, typeOrExpire);
         }
-        std::cout << "type:" << static_cast<int>(typeOrExpire) << std::endl;
         std::string key;
         long keysize = 0;
         loadInteger(ifs, keysize);
-        std::cout << "keysize:" << keysize << std::endl;
         loadString(ifs, key, keysize);
-        std::cout << "key:" << key << std::endl;
         if (hasExpire) {
             this->expire.insert({key, etime});
         }
@@ -347,6 +414,18 @@ void Db::load(const std::string& filename) {
                 break;
             case SdbObjType::SDB_LIST:
                 loadListObject(ifs, tobesave, key);
+                break;
+            case SdbObjType::SDB_SET:
+                loadSetObject(ifs, tobesave, key);
+                break;
+            case SdbObjType::SDB_OSET:
+                loadOsetObject(ifs, tobesave, key);
+                break;
+            case SdbObjType::SDB_HASH:
+                loadHashObject(ifs, tobesave, key);
+                break;
+            default:
+                throw SdbException("file is not correct!");
                 break;
         }
     }

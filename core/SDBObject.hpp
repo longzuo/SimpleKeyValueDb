@@ -408,7 +408,7 @@ ssize_t SDBObject::getStrLen() {
     }
 }
 void SDBObject::push(std::string&& s) {
-    if (this->objtype != SdbObjType::SDB_LIST ||
+    if (this->objtype != SdbObjType::SDB_LIST &&
         this->objtype != SdbObjType::SDB_NULL) {
         throw SdbException("command is not supported for this type!");
     }
