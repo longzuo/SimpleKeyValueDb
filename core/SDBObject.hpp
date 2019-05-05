@@ -23,7 +23,7 @@ enum class SdbObjType {
     SDB_NULL
 };
 enum class SdbEncType {
-    SDB_ENC_INT,
+    SDB_ENC_INT = 6,
     SDB_ENC_HT,
     SDB_ENC_RAW,
     SDB_ENC_LINKEDLIST,
@@ -67,10 +67,11 @@ class SDBObject {
     // for object
     std::string getObjType();
     std::string getEncType();
-    SdbObjType getEnumObjType(){return this->objtype;}
+    SdbObjType getEnumObjType() { return this->objtype; }
 
     // for String
     void set(std::string&&);
+    void set(long);
     void append(const std::string&);
     ssize_t getStrLen();
 
@@ -347,6 +348,20 @@ void SDBObject::set(std::string&& s) {
         this->value.str = new std::string(std::move(s));
         this->enctype = SdbEncType::SDB_ENC_RAW;
     }
+}
+void SDBObject::set(long istr) {
+    if (this->objtype != SdbObjType::SDB_STRING &&
+        this->objtype != SdbObjType::SDB_NULL) {
+        throw SdbException("command is not supported for this type!");
+    }
+    this->objtype = SdbObjType::SDB_STRING;
+    if (this->enctype == SdbEncType::SDB_ENC_RAW) {
+        if (this->value.str) {
+            delete this->value.str;
+        }
+    }
+    this->value.istr = istr;
+    this->enctype = SdbEncType::SDB_ENC_INT;
 }
 
 void SDBObject::append(const std::string& data) {
