@@ -5,6 +5,7 @@ namespace SDB {
 class StringUtil final {
    public:
     static double toDouble(const std::string&);
+    static std::string toString(double);
 };
 
 double StringUtil::toDouble(const std::string& str) {
@@ -56,6 +57,18 @@ double StringUtil::toDouble(const std::string& str) {
         res = 0 - res;
     }
     return res;
+}
+std::string StringUtil::toString(double d) {
+    std::string res = std::to_string(d);
+    int i = res.size() - 1;
+    //删除无效的0
+    while (i >= 0 && res[i] == '0') --i;
+    //小数点以后全为0，删除小数点
+    if (i >= 0 && res[i] == '.') {
+        --i;
+    }
+    res.resize(i + 1);
+    return std::move(res);
 }
 
 }  // namespace SDB

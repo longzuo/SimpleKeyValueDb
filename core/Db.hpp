@@ -184,7 +184,7 @@ void Db::saveOsetObject(std::ofstream& ofs, const SDBObject::ObjPointer& obj) {
     saveInteger(ofs, sklist.len());
     auto ptr = sklist.first();
     while (ptr.get()) {
-        saveString(ofs, std::to_string(ptr->score));
+        saveString(ofs, StringUtil::toString(ptr->score));
         saveString(ofs, ptr->data);
         ptr = ptr->next();
     }
