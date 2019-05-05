@@ -407,7 +407,18 @@ ssize_t SDBObject::getStrLen() {
         throw SdbException("command is not supported for this type!");
     }
 }
-void SDBObject::push(std::string&& s) { this->value.list->push(std::move(s)); }
+void SDBObject::push(std::string&& s) {
+    if (this->objtype != SdbObjType::SDB_LIST ||
+        this->objtype != SdbObjType::SDB_NULL) {
+        throw SdbException("command is not supported for this type!");
+    }
+    if (this->objtype == SdbObjType::SDB_NULL) {
+        this->objtype = SdbObjType::SDB_LIST;
+        this->enctype = SdbEncType::SDB_ENC_LINKEDLIST;
+        this->value.list = new List<std::string>;
+    }
+    this->value.list->push(std::move(s));
+}
 void SDBObject::pop(std::ostream& out) {
     if (this->objtype != SdbObjType::SDB_LIST) {
         throw SdbException("command is not supported for this type!");

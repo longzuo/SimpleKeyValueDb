@@ -46,6 +46,7 @@ void loadInteger(std::ifstream& ifs, long& ldata) {
     ifs.read(reinterpret_cast<char*>(&ldata), sizeof(long));
 }
 void loadString(std::ifstream& ifs, std::string& str, long len) {
+    if(len<=0)return;
     str.reserve(str.size() + len);
     char ch;
     while (len > 0 && ifs.get(ch)) {

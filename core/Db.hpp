@@ -225,6 +225,7 @@ void Db::save(const std::string& filename) {
         saveObjectType(ofs, dbit->second);
         // save key
         saveString(ofs, dbit->first);
+        // std::cout<<"save key:"<<dbit->first<<std::endl;
         switch (dbit->second->getEnumObjType()) {
             case SdbObjType::SDB_STRING:
                 saveStringObject(ofs, dbit->second);
@@ -257,7 +258,11 @@ void Db::loadStringObject(std::ifstream& ifs, bool tobesave, std::string& key) {
         long istr = 0;
         loadInteger(ifs, istr);
         if (tobesave) {
-            this->db[std::move(key)]->set(istr);
+            auto& ptr = this->db[std::move(key)];
+            if (!ptr.get()) {
+                ptr = SDBObject::CreateStrObject();
+            }
+            ptr->set(istr);
         }
     } else if (enctype == SdbEncType::SDB_ENC_RAW) {
         std::string str;
@@ -274,8 +279,26 @@ void Db::loadStringObject(std::ifstream& ifs, bool tobesave, std::string& key) {
         }
     }
 }
-void Db::loadListObject(std::ifstream&, bool, std::string&) {
-    
+void Db::loadListObject(std::ifstream& ifs, bool tobesave, std::string& key) {
+    //
+    long length = 0;
+    loadInteger(ifs, length);
+    auto& ptr = this->db[std::move(key)];
+    if (tobesave) {
+        if (!ptr.get()) {
+            ptr = SDBObject::CreateListObject();
+        }
+    }
+    while (length > 0 && ifs.peek() != EOF) {
+        long strsize=0;
+        std::string str;
+        loadInteger(ifs,strsize);
+        loadString(ifs,str,strsize);
+        if(tobesave){
+            ptr->push(std::move(str));
+        }
+        length--;
+    }
 }
 void Db::loadHashObject(std::ifstream& ifs, bool, std::string&) {}
 void Db::loadOsetObject(std::ifstream&, bool, std::string&) {}
@@ -291,7 +314,7 @@ void Db::load(const std::string& filename) {
     int dbversion = 0;
     loadInteger(ifs, dbversion);
     std::cout << "db version:" << dbversion << std::endl;
-    while (!ifs.eof()) {
+    while (ifs.peek() != EOF) {
         char typeOrExpire = 0;
         bool hasExpire = false;
         bool tobesave = true;
@@ -321,6 +344,9 @@ void Db::load(const std::string& filename) {
         switch (static_cast<SdbObjType>(typeOrExpire)) {
             case SdbObjType::SDB_STRING:
                 loadStringObject(ifs, tobesave, key);
+                break;
+            case SdbObjType::SDB_LIST:
+                loadListObject(ifs, tobesave, key);
                 break;
         }
     }
