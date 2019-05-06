@@ -74,6 +74,7 @@ class SDBObject {
     void set(long);
     void append(const std::string&);
     ssize_t getStrLen();
+    std::string getRange(size_t, size_t);
 
     // for list
     void push(std::string&&);
@@ -407,6 +408,24 @@ ssize_t SDBObject::getStrLen() {
         throw SdbException("command is not supported for this type!");
     }
 }
+
+std::string SDBObject::getRange(size_t start, size_t end) {
+    if (this->objtype != SdbObjType::SDB_STRING) {
+        throw SdbException("command is not supported for this type!");
+    }
+    if (this->enctype == SdbEncType::SDB_ENC_RAW) {
+        if (start >= this->value.str->size()) {
+            return "";
+        }
+        return this->value.str->substr(start, end - start + 1);
+    }
+    std::string temp = std::to_string(this->value.istr);
+    if (start >= temp.size()) {
+        return "";
+    }
+    return temp.substr(start, end - start + 1);
+}
+
 void SDBObject::push(std::string&& s) {
     if (this->objtype != SdbObjType::SDB_LIST &&
         this->objtype != SdbObjType::SDB_NULL) {

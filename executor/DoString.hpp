@@ -9,7 +9,7 @@ void doSset(std::vector<std::string>&, std::ostream&, Db&);
 void doSget(std::vector<std::string>&, std::ostream&, Db&);
 void doStrlen(std::vector<std::string>&, std::ostream&, Db&);
 void doAppend(std::vector<std::string>&, std::ostream&, Db&);
-
+void doGetRange(std::vector<std::string>&, std::ostream&, Db&);
 // define
 
 void doString(std::vector<std::string>& commands, std::ostream& out, Db& db) {
@@ -21,6 +21,8 @@ void doString(std::vector<std::string>& commands, std::ostream& out, Db& db) {
         doAppend(commands, out, db);
     } else if (commands[0] == "strlen") {
         doStrlen(commands, out, db);
+    } else if (commands[0] == "getrange") {
+        doGetRange(commands, out, db);
     } else {
         throw SdbException("unknown command:" + commands[0]);
     }
@@ -74,11 +76,32 @@ void doAppend(std::vector<std::string>& commands, std::ostream& out, Db& db) {
 }
 
 void doStrlen(std::vector<std::string>& commands, std::ostream& out, Db& db) {
+    if (commands.size() < 2) {
+        throw SdbException("error:missing arguments!");
+    }
     SDBObject::ObjPointer res = db.find(commands[1]);
     if (res.get()) {
         out << std::to_string(res->getStrLen()) << '\n';
     } else {
         out << "0" << '\n';
+    }
+}
+
+void doGetRange(std::vector<std::string>& commands, std::ostream& out, Db& db) {
+    if (commands.size() < 4) {
+        throw SdbException("error:missing arguments!");
+    }
+    SDBObject::ObjPointer res = db.find(commands[1]);
+    if (res.get()) {
+        int start = StringUtil::toDouble(commands[2]);
+        int end = StringUtil::toDouble(commands[3]);
+        std::string temp = res->getRange(start, end);
+        if (temp.size() > 0)
+            out << temp << '\n';
+        else
+            out << "\"\"" << '\n';
+    } else {
+        out << "null" << '\n';
     }
 }
 
