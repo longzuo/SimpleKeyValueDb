@@ -1,8 +1,13 @@
+CLIENTDIR=./client
+SERVERDIR=./server
 default:
-	make build
-build:
-	g++ sdb.cpp -o sdb -W
-debug:
-	g++ -g sdb.cpp -o sdb
-clear:
-	rm sdb
+	make all
+sdbclient:
+	make -C client
+sdbserver:
+	make -C server
+all:
+	make sdbclient
+	make sdbserver
+clean:
+	rm ./client/sdbclient ./server/sdbserver

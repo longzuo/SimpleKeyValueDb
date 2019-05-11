@@ -141,10 +141,11 @@ size_t Buffer::writeToFd(int fd) {
     // flags |= O_NDELAY;
     // fcntl(fd, F_SETFL, flags);
     char* start = const_cast<char*>(buffer.c_str());
-    if ((wcount = ::write(fd, start, size())) > 0) {
+    if ((wcount = ::write(fd, start + readstart, size())) > 0) {
         readstart += wcount;
     }
     //如果写完了就清空buffer
+    //使下一次push从开始处添加
     if (size() == 0) {
         clear();
     }
