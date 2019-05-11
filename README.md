@@ -39,6 +39,18 @@
 * hadd key field1 field2
 * hdel key field1
 * hgetall key
+### 数据库层面指令
+* select number
+* del key
+* expire key seconds
+* pexpire key milliseconds
+* save filename
+* load filename  
+#### 注
+* select是选择当前数据库，默认为0
+* expire是设定键过期指令，秒为单位，采用惰性删除策略。pexpire是设定毫秒过期时间，由于存储的是time_t，事实上毫秒会转化成秒，所以目前没有毫秒精度，有时间再更改。
+* save是将当前数据库中的内容存储到指定文件中，文件内容没有压缩，是直接可读的文本内容,不过在整数存储上对int和long之类的进行了优化，前一个字节存放数字编码长度，后面紧跟的几个字节存放数字内容。
+* load是将指定文件中的内容加载到当前数据库中
 
 指令识别采用string比较，效率较低，可以改成通过哈希进行映射。
 
