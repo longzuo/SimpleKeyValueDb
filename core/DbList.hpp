@@ -18,7 +18,9 @@ class DbList final {
 DbList::DbListType DbList::dblist;
 void DbList::init(int size) {
     // resize
-    DbList::dblist.resize(size);
+    if (dblist.size() == 0) {
+        dblist.resize(size);
+    }
 }
 
 DbList::DbListPointer DbList::getDbList() { return (&dblist); }
