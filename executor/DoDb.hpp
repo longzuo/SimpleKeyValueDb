@@ -11,8 +11,8 @@ void doSelect(const std::vector<std::string>&, std::ostream&, std::vector<Db>&,
 void doDel(const std::vector<std::string>&, std::ostream&, Db&);
 void doExpire(std::vector<std::string>&, std::ostream&, Db&);
 void doPrecisionExpire(std::vector<std::string>&, std::ostream&, Db&);
-void doSave(const std::vector<std::string>&, Db&);
-void doLoad(const std::vector<std::string>&, Db&);
+void doSave(const std::vector<std::string>&, std::ostream&, Db&);
+void doLoad(const std::vector<std::string>&, std::ostream&, Db&);
 // define
 void doDb(std::vector<std::string>& commands, std::ostream& out,
           std::vector<Db>& dblist, unsigned int& currentdb) {
@@ -28,10 +28,10 @@ void doDb(std::vector<std::string>& commands, std::ostream& out,
     } else if (commands[0] == "pexpire") {
         doPrecisionExpire(commands, out, dblist[currentdb]);
     } else if (commands[0] == "save") {
-        doSave(commands, dblist[currentdb]);
-    } else if(commands[0]=="load"){
-        doLoad(commands,dblist[currentdb]);
-    }else {
+        doSave(commands, out, dblist[currentdb]);
+    } else if (commands[0] == "load") {
+        doLoad(commands, out, dblist[currentdb]);
+    } else {
         throw SdbException("unknown command:" + commands[0]);
     }
 }
@@ -77,14 +77,14 @@ void doPrecisionExpire(std::vector<std::string>& commands, std::ostream& out,
     db.addPrecisionExpire(commands[1], commands[2]);
 }
 
-void doSave(const std::vector<std::string>& commands, Db& db) {
+void doSave(const std::vector<std::string>& commands, std::ostream&, Db& db) {
     if (commands.size() < 2) {
         throw SdbException("error:missing arguments!");
     }
     db.save(commands[1]);
 }
 
-void doLoad(const std::vector<std::string>& commands, Db& db) {
+void doLoad(const std::vector<std::string>& commands, std::ostream&, Db& db) {
     if (commands.size() < 2) {
         throw SdbException("error:missing arguments!");
     }

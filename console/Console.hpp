@@ -28,7 +28,6 @@ void Console::run() {
         } catch (const SdbException& e) {
             std::cout << e.what() << std::endl;
         }
-        
     }
 }
 }  // namespace SDB

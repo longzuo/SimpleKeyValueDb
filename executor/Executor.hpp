@@ -1,5 +1,6 @@
 #ifndef SDB_EXECUTOR_HPP
 #define SDB_EXECUTOR_HPP
+#include <functional>
 #include <sstream>
 #include "./DoDb.hpp"
 #include "./DoHash.hpp"
@@ -10,15 +11,24 @@
 #include "./DoString.hpp"
 namespace SDB {
 
+using DefaultFunc =
+    std::function<void(std::vector<std::string>&, std::ostream&, Db&)>;
 class Executor {
    private:
     std::vector<Db> dblist;
     unsigned int currentdb = 0;
+    std::unordered_map<std::string, DefaultFunc> funcTables;
+
+    void initFuncTables();
 
    public:
-    Executor() { dblist.resize(2); }
+    Executor();
     void execute(const std::string&, std::ostream&);
 };
+Executor::Executor() {
+    dblist.resize(2);
+    initFuncTables();
+}
 void Executor::execute(const std::string& command, std::ostream& out) {
     std::vector<std::string> words;
     std::istringstream wordsStream(command);
@@ -29,27 +39,41 @@ void Executor::execute(const std::string& command, std::ostream& out) {
     if (words.size() == 0) {
         return;
     }
-    if (words[0] == "object") {
-        doObject(words, out, dblist[currentdb]);
-    } else if (words[0] == "select" || words[0] == "del" ||
-               words[0] == "expire" || words[0] == "pexpire" ||
-               words[0] == "save"||words[0]=="load") {
-        doDb(words, out, dblist, currentdb);
-    } else if (words[0] == "lpush" || words[0] == "lgetall" ||
-               words[0] == "lpop" || words[0] == "llen") {
-        doList(words, out, dblist[currentdb]);
-    } else if (words[0] == "hadd" || words[0] == "hdel" ||
-               words[0] == "hgetall") {
-        doHash(words, out, dblist[currentdb]);
-    } else if (words[0] == "oadd" || words[0] == "odel" ||
-               words[0] == "ogetall") {
-        doOset(words, out, dblist[currentdb]);
-    } else if (words[0] == "sadd" || words[0] == "sdel" ||
-               words[0] == "sgetall") {
-        doSet(words, out, dblist[currentdb]);
+    auto funcIt = funcTables.find(words[0]);
+    if (funcIt != funcTables.end()) {
+        funcIt->second(words, out, dblist[currentdb]);
+    } else if (words[0] == "select") {
+        doSelect(words, out, dblist, currentdb);
     } else {
-        doString(words, out, dblist[currentdb]);
+        throw SdbException("unknown command:" + words[0]);
     }
+}
+void Executor::initFuncTables() {
+    funcTables.reserve(40);
+    funcTables["object"] = doObject;
+    funcTables["lpush"] = doPush;
+    funcTables["lgetall"] = doLGetAll;
+    funcTables["lpop"] = doPop;
+    funcTables["llen"] = doLlen;
+    funcTables["hadd"] = doHadd;
+    funcTables["hdel"] = doHdel;
+    funcTables["hgetall"] = doHgetall;
+    funcTables["oadd"] = doOadd;
+    funcTables["odel"] = doOdel;
+    funcTables["ogetall"] = doOgetall;
+    funcTables["sadd"] = doSadd;
+    funcTables["sdel"] = doSdel;
+    funcTables["sgetall"] = doSgetall;
+    funcTables["set"] = doSset;
+    funcTables["get"] = doSget;
+    funcTables["append"] = doAppend;
+    funcTables["strlen"] = doStrlen;
+    funcTables["getrange"] = doGetRange;
+    funcTables["del"] = doDel;
+    funcTables["expire"] = doExpire;
+    funcTables["pexpire"] = doPrecisionExpire;
+    funcTables["save"] = doSave;
+    funcTables["load"] = doLoad;
 }
 
 }  // namespace SDB

@@ -7,7 +7,7 @@ namespace SDB {
 void doList(std::vector<std::string>&, std::ostream&, Db&);
 void doPush(std::vector<std::string>&, std::ostream&, Db&);
 void doPop(std::vector<std::string>&, std::ostream&, Db&);
-void doGetAll(std::vector<std::string>&, std::ostream&, Db&);
+void doLGetAll(std::vector<std::string>&, std::ostream&, Db&);
 void doLlen(std::vector<std::string>&, std::ostream&, Db&);
 // define
 void doList(std::vector<std::string>& commands, std::ostream& out, Db& db) {
@@ -16,7 +16,7 @@ void doList(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     } else if (commands[0] == "lpop") {
         doPop(commands, out, db);
     } else if (commands[0] == "lgetall") {
-        doGetAll(commands, out, db);
+        doLGetAll(commands, out, db);
     } else if (commands[0] == "llen") {
         doLlen(commands, out, db);
     } else {
@@ -50,7 +50,7 @@ void doPop(std::vector<std::string>& commands, std::ostream& out, Db& db) {
         }
     }
 }
-void doGetAll(std::vector<std::string>& commands, std::ostream& out, Db& db) {
+void doLGetAll(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (commands.size() < 2) {
         throw SdbException("error:missing arguments!");
     } else {
