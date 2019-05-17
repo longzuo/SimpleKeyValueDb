@@ -4,29 +4,12 @@
 #include "../core/Exception.hpp"
 namespace SDB {
 // declare
-void doString(std::vector<std::string>&, std::ostream&, Db&);
 void doSset(std::vector<std::string>&, std::ostream&, Db&);
 void doSget(std::vector<std::string>&, std::ostream&, Db&);
 void doStrlen(std::vector<std::string>&, std::ostream&, Db&);
 void doAppend(std::vector<std::string>&, std::ostream&, Db&);
 void doGetRange(std::vector<std::string>&, std::ostream&, Db&);
 // define
-
-void doString(std::vector<std::string>& commands, std::ostream& out, Db& db) {
-    if (commands[0] == "set") {
-        doSset(commands, out, db);
-    } else if (commands[0] == "get") {
-        doSget(commands, out, db);
-    } else if (commands[0] == "append") {
-        doAppend(commands, out, db);
-    } else if (commands[0] == "strlen") {
-        doStrlen(commands, out, db);
-    } else if (commands[0] == "getrange") {
-        doGetRange(commands, out, db);
-    } else {
-        throw SdbException("unknown command:" + commands[0]);
-    }
-}
 
 void doSset(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (commands.size() < 3) {

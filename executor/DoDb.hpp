@@ -4,8 +4,6 @@
 #include "../core/Exception.hpp"
 namespace SDB {
 // declare
-void doDb(std::vector<std::string>&, std::ostream&, std::vector<Db>&,
-          unsigned int&);
 void doSelect(const std::vector<std::string>&, std::ostream&, std::vector<Db>&,
               unsigned int&);
 void doDel(const std::vector<std::string>&, std::ostream&, Db&);
@@ -14,27 +12,6 @@ void doPrecisionExpire(std::vector<std::string>&, std::ostream&, Db&);
 void doSave(const std::vector<std::string>&, std::ostream&, Db&);
 void doLoad(const std::vector<std::string>&, std::ostream&, Db&);
 // define
-void doDb(std::vector<std::string>& commands, std::ostream& out,
-          std::vector<Db>& dblist, unsigned int& currentdb) {
-    if (commands.size() < 2) {
-        throw SdbException("error:missing arguments!");
-    }
-    if (commands[0] == "select") {
-        doSelect(commands, out, dblist, currentdb);
-    } else if (commands[0] == "del") {
-        doDel(commands, out, dblist[currentdb]);
-    } else if (commands[0] == "expire") {
-        doExpire(commands, out, dblist[currentdb]);
-    } else if (commands[0] == "pexpire") {
-        doPrecisionExpire(commands, out, dblist[currentdb]);
-    } else if (commands[0] == "save") {
-        doSave(commands, out, dblist[currentdb]);
-    } else if (commands[0] == "load") {
-        doLoad(commands, out, dblist[currentdb]);
-    } else {
-        throw SdbException("unknown command:" + commands[0]);
-    }
-}
 void doSelect(const std::vector<std::string>& commands, std::ostream&,
               std::vector<Db>& dblist, unsigned int& currentdb) {
     unsigned int selectdb = 0;

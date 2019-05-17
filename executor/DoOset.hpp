@@ -5,20 +5,10 @@
 #include "../util/StringUtil.hpp"
 namespace SDB {
 // declare
-void doOset(std::vector<std::string>&, std::ostream&, Db&);
 void doOadd(std::vector<std::string>&, std::ostream&, Db&);
 void doOdel(std::vector<std::string>&, std::ostream&, Db&);
 void doOgetall(std::vector<std::string>&, std::ostream&, Db&);
 // define
-void doOset(std::vector<std::string>& commands, std::ostream& out, Db& db) {
-    if (commands[0] == "oadd") {
-        doOadd(commands, out, db);
-    } else if (commands[0] == "odel") {
-        doOdel(commands, out, db);
-    } else if (commands[0] == "ogetall") {
-        doOgetall(commands, out, db);
-    }
-}
 void doOadd(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (commands.size() < 4) {
         throw SdbException("missing arguments!");

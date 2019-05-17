@@ -6,6 +6,8 @@ sdbclient:
 	make -C client
 sdbserver:
 	make -C server
+sdbconsole:
+	make -C console
 all:
 	make sdbclient
 	make sdbserver

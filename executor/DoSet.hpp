@@ -4,20 +4,10 @@
 #include "../core/Exception.hpp"
 namespace SDB {
 // declare
-void doSet(std::vector<std::string>&, std::ostream&, Db&);
 void doSadd(std::vector<std::string>&, std::ostream&, Db&);
 void doSdel(std::vector<std::string>&, std::ostream&, Db&);
 void doSgetall(std::vector<std::string>&, std::ostream&, Db&);
 // define
-void doSet(std::vector<std::string>& commands, std::ostream& out, Db& db) {
-    if (commands[0] == "sadd") {
-        doSadd(commands, out, db);
-    } else if (commands[0] == "sdel") {
-        doSdel(commands, out, db);
-    } else if (commands[0] == "sgetall") {
-        doSgetall(commands, out, db);
-    }
-}
 
 void doSadd(std::vector<std::string>& commands, std::ostream& out, Db& db) {
     if (commands.size() < 3) {

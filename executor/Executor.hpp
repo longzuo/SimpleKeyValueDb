@@ -2,6 +2,7 @@
 #define SDB_EXECUTOR_HPP
 #include <functional>
 #include <sstream>
+#include "../core/DbList.hpp"
 #include "./DoDb.hpp"
 #include "./DoHash.hpp"
 #include "./DoList.hpp"
@@ -15,7 +16,7 @@ using DefaultFunc =
     std::function<void(std::vector<std::string>&, std::ostream&, Db&)>;
 class Executor {
    private:
-    std::vector<Db> dblist;
+    DbList::DbListPointer dblistptr;
     unsigned int currentdb = 0;
     std::unordered_map<std::string, DefaultFunc> funcTables;
 
@@ -26,7 +27,8 @@ class Executor {
     void execute(const std::string&, std::ostream&);
 };
 Executor::Executor() {
-    dblist.resize(2);
+    DbList::init(2);
+    dblistptr = DbList::getDbList();
     initFuncTables();
 }
 void Executor::execute(const std::string& command, std::ostream& out) {
@@ -41,9 +43,9 @@ void Executor::execute(const std::string& command, std::ostream& out) {
     }
     auto funcIt = funcTables.find(words[0]);
     if (funcIt != funcTables.end()) {
-        funcIt->second(words, out, dblist[currentdb]);
+        funcIt->second(words, out, (*dblistptr)[currentdb]);
     } else if (words[0] == "select") {
-        doSelect(words, out, dblist, currentdb);
+        doSelect(words, out, *dblistptr, currentdb);
     } else {
         throw SdbException("unknown command:" + words[0]);
     }

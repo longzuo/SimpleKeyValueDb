@@ -4,7 +4,7 @@
 #include <iostream>
 #include <random>
 #include <string>
-#include "./console/Console.hpp"
+#include "Console.hpp"
 using namespace SDB;
 int main() {
     Console console;
